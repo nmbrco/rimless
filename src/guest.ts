@@ -1,6 +1,6 @@
-import { extractMethods, isWorker } from "./helpers";
-import { registerLocalMethods, registerRemoteMethods } from "./rpc";
-import { actions, events, IConnection, ISchema } from "./types";
+import { extractMethods, isWorker } from './helpers';
+import { registerLocalMethods, registerRemoteMethods } from './rpc';
+import { actions, events, IConnection, ISchema } from './types';
 
 const REQUEST_INTERVAL = 600;
 const TIMEOUT_INTERVAL = 3000;
@@ -8,9 +8,11 @@ const TIMEOUT_INTERVAL = 3000;
 let interval: any = null;
 let connected = false;
 
-function connect(schema: ISchema = {}, options: any = {}): Promise<IConnection> {
+function connect(
+  schema: ISchema = {},
+  options: any = {},
+): Promise<IConnection> {
   return new Promise((resolve, reject) => {
-
     const localMethods = extractMethods(schema);
 
     // on handshake response
@@ -18,11 +20,19 @@ function connect(schema: ISchema = {}, options: any = {}): Promise<IConnection> 
       if (event.data.action !== actions.HANDSHAKE_REPLY) return;
 
       // register local methods
-      const unregisterLocal = registerLocalMethods(schema, localMethods, event.data.connectionID);
+      const unregisterLocal = registerLocalMethods(
+        schema,
+        localMethods,
+        event.data.connectionID,
+      );
 
       // register remote methods
-      const { remote, unregisterRemote } =
-        registerRemoteMethods(event.data.schema, event.data.methods, event.data.connectionID, event);
+      const { remote, unregisterRemote } = registerRemoteMethods(
+        event.data.schema,
+        event.data.methods,
+        event.data.connectionID,
+        event,
+      );
 
       // close the connection and all listeners when called
       const close = () => {
@@ -52,18 +62,16 @@ function connect(schema: ISchema = {}, options: any = {}): Promise<IConnection> 
 
       // publish the HANDSHAKE REQUEST
       if (isWorker()) (self as any).postMessage(payload);
-      else window.parent.postMessage(payload, "*");
-
+      else window.parent.postMessage(payload, '*');
     }, REQUEST_INTERVAL);
 
     // timeout the connection after a time
     setTimeout(() => {
-      if (!connected) reject("connection timeout");
+      if (!connected) reject('connection timeout');
     }, TIMEOUT_INTERVAL);
-
   });
 }
 
-export default ({
+export default {
   connect,
-});
+};

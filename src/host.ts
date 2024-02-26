@@ -1,13 +1,13 @@
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
-import { extractMethods, getOriginFromURL } from "./helpers";
-import { registerLocalMethods, registerRemoteMethods } from "./rpc";
-import { actions, events, IConnections, IConnection, ISchema } from "./types";
+import { extractMethods, getOriginFromURL } from './helpers';
+import { registerLocalMethods, registerRemoteMethods } from './rpc';
+import { actions, events, IConnections, IConnection, ISchema } from './types';
 
 const connections: IConnections = {};
 
 function isValidTarget(iframe: HTMLIFrameElement, event: any) {
-  const childURL = iframe.getAttribute("src");
+  const childURL = iframe.getAttribute('src');
   const childOrigin = getOriginFromURL(childURL);
   const hasProperOrigin = event.origin === childOrigin;
   const hasProperSource = event.source === iframe.contentWindow;
@@ -29,7 +29,7 @@ function connect(
   schema: ISchema = {},
   options?: any,
 ): Promise<IConnection> {
-  if (!guest) throw new Error("a target is required");
+  if (!guest) throw new Error('a target is required');
 
   // this check should be improved
   const guestIsWorker =
@@ -42,17 +42,27 @@ function connect(
 
     // on handshake request
     function handleHandshake(event: any) {
-      if (!guestIsWorker && !isValidTarget(guest as HTMLIFrameElement, event)) return;
+      if (!guestIsWorker && !isValidTarget(guest as HTMLIFrameElement, event))
+        return;
       if (event.data.action !== actions.HANDSHAKE_REQUEST) return;
 
       // register local methods
       const localMethods = extractMethods(schema);
-      const unregisterLocal =
-        registerLocalMethods(schema, localMethods, connectionID, guestIsWorker ? (guest as Worker) : undefined);
+      const unregisterLocal = registerLocalMethods(
+        schema,
+        localMethods,
+        connectionID,
+        guestIsWorker ? (guest as Worker) : undefined,
+      );
 
       // register remote methods
-      const { remote, unregisterRemote } =
-        registerRemoteMethods(event.data.schema, event.data.methods, connectionID, event, guestIsWorker ? (guest as Worker) : undefined);
+      const { remote, unregisterRemote } = registerRemoteMethods(
+        event.data.schema,
+        event.data.methods,
+        connectionID,
+        event,
+        guestIsWorker ? (guest as Worker) : undefined,
+      );
 
       const payload = {
         action: actions.HANDSHAKE_REPLY,
@@ -83,6 +93,6 @@ function connect(
   });
 }
 
-export default ({
+export default {
   connect,
-});
+};

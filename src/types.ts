@@ -1,13 +1,13 @@
 export enum events {
-  MESSAGE = "message",
+  MESSAGE = 'message',
 }
 
 export enum actions {
-  HANDSHAKE_REQUEST = "RIMLESS/HANDSHAKE_REQUEST",
-  HANDSHAKE_REPLY = "RIMLESS/HANDSHAKE_REPLY",
-  RPC_REQUEST = "RIMLESS/RPC_REQUEST",
-  RPC_RESOLVE = "RIMLESS/RPC_RESOLVE",
-  RPC_REJECT = "RIMLESS/RPC_REJECT",
+  HANDSHAKE_REQUEST = 'RIMLESS/HANDSHAKE_REQUEST',
+  HANDSHAKE_REPLY = 'RIMLESS/HANDSHAKE_REPLY',
+  RPC_REQUEST = 'RIMLESS/RPC_REQUEST',
+  RPC_RESOLVE = 'RIMLESS/RPC_RESOLVE',
+  RPC_REJECT = 'RIMLESS/RPC_REJECT',
 }
 
 export interface ISchema {
@@ -26,10 +26,11 @@ export interface IConnections {
 export interface IEvent extends EventListener {
   source?: Window;
   origin?: string;
-  data?: IHandshakeRequestPayload
-  | IHandshakeConfirmationPayload
-  | IRPCRequestPayload
-  | IRPCResolvePayload;
+  data?:
+    | IHandshakeRequestPayload
+    | IHandshakeConfirmationPayload
+    | IRPCRequestPayload
+    | IRPCResolvePayload;
 }
 
 export interface IHandshakeRequestPayload {
