@@ -19,6 +19,7 @@
     "test:integrations": "npx serve -p 8080 tests/integrations/",
     "clean": "rm -rf node_modules && npm i",
     "prepare": "npm run build",
+    "dev": "rollup -c -w",
     "build": "rollup -c && cp lib/rimless.min.js tests/integrations",
     "build:storybook": "build-storybook",
     "deploy": "gh-pages -d storybook-static",
