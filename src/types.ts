@@ -17,6 +17,7 @@ export interface ISchema {
 export interface IConnection {
   remote: ISchema;
   close: () => void;
+  clientId?: string;
 }
 
 export interface IConnections {
