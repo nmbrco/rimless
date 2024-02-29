@@ -1,10 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "declaration": true,
     "target": "esnext",
     "module": "esnext",
@@ -15,14 +11,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": [
-      "jest",
-      "lodash.get",
-      "lodash.set",
-      "uuid"
-    ]
+    "types": ["jest", "lodash.get", "lodash.set", "uuid"]
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }
