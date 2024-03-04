@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { extractMethods, getOriginFromURL, isWorker } from './helpers';
 import { registerLocalMethods, registerRemoteMethods } from './rpc';
-import { actions, events, IConnection, ISchema } from './types';
+import { actions, events, IConnection, ISchema, IServer } from './types';
 
 type Guest = HTMLIFrameElement | Worker | null;
 type MessageHandler = (event: MessageEvent) => void | Promise<void>;
@@ -281,7 +281,7 @@ export function serve(
   hostTarget: Window | Worker | ServiceWorkerGlobalScope,
   schema: ISchema = {},
   options?: any
-) {
+): IServer {
   const server = findOrCreateHostFor(hostTarget);
   let isStopped = false;
 

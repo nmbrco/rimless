@@ -24,6 +24,11 @@ export interface IConnections {
   [connectionID: string]: ISchema;
 }
 
+export interface IServer {
+  connections: AsyncGenerator<IConnection, void, unknown>;
+  stop: () => void;
+}
+
 export interface IEvent extends EventListener {
   source?: Window;
   origin?: string;
