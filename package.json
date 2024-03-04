@@ -1,15 +1,13 @@
 {
   "name": "rimless",
   "author": "Aurélien Franky",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "license": "MIT",
   "homepage": "https://au-re.github.io/rimless",
   "description": "event base communication made easy with a promise-based API wrapping `postMessage`",
   "browser": "lib/index.js",
   "types": "lib/index.d.ts",
-  "files": [
-    "/lib"
-  ],
+  "files": ["/lib"],
   "scripts": {
     "analyze": "source-map-explorer lib/rimless.min.js",
     "coverage": "npm run test -- --coverage",
