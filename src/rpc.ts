@@ -11,6 +11,20 @@ import {
   ISchema,
 } from './types';
 
+type MessageReceiver =
+  | Worker
+  | {
+      addEventListener: (
+        type: 'message',
+        handler: (event: MessageEvent) => void | Promise<void>
+      ) => void;
+      removeEventListener: (
+        type: 'message',
+        handler: (event: MessageEvent) => void | Promise<void>
+      ) => void;
+      postMessage?: never;
+    };
+
 /**
  * for each function in the schema
  * 1. subscribe to an event that the remote can call
@@ -24,7 +38,7 @@ export function registerLocalMethods(
   schema: ISchema = {},
   methods: any[] = [],
   _connectionID: string,
-  guest?: Worker,
+  messageReceiver?: MessageReceiver
 ): any {
   const listeners: any[] = [];
   methods.forEach((methodName) => {
@@ -59,23 +73,38 @@ export function registerLocalMethods(
         payload.result = JSON.parse(JSON.stringify(result));
       } catch (error) {
         payload.error = JSON.parse(
-          JSON.stringify(error, Object.getOwnPropertyNames(error)),
+          JSON.stringify(error, Object.getOwnPropertyNames(error))
         );
       }
 
-      if (guest) guest.postMessage(payload);
-      else if (isWorker()) (self as any).postMessage(payload);
-      else event.source.postMessage(payload, event.origin);
+      if (messageReceiver && messageReceiver.postMessage) {
+        messageReceiver.postMessage(payload);
+      } else if (isWorker()) {
+        (self as any).postMessage(payload);
+      } else if (event.source.window === event.source) {
+        event.source.postMessage(payload, event.origin);
+      } else {
+        event.source.postMessage(payload);
+      }
     }
 
     // subscribe to the call event
-    if (guest) guest.addEventListener(events.MESSAGE, handleCall);
-    else self.addEventListener(events.MESSAGE, handleCall);
-
-    listeners.push(() => self.removeEventListener(events.MESSAGE, handleCall));
+    if (messageReceiver) {
+      messageReceiver.addEventListener(events.MESSAGE, handleCall);
+      listeners.push(() =>
+        messageReceiver.removeEventListener(events.MESSAGE, handleCall)
+      );
+    } else {
+      self.addEventListener(events.MESSAGE, handleCall);
+      listeners.push(() =>
+        self.removeEventListener(events.MESSAGE, handleCall)
+      );
+    }
   });
 
-  return () => listeners.forEach((unregister) => unregister());
+  return () => {
+    listeners.forEach((unregister) => unregister());
+  };
 }
 
 /**
@@ -86,7 +115,7 @@ export function registerLocalMethods(
  * @param _connectionID
  * @param event
  * @param listeners
- * @param guest
+ * @param messageReceiver
  *
  * @returns a promise with the result of the RPC
  */
@@ -95,7 +124,7 @@ export function createRPC(
   _connectionID: string,
   event: any,
   listeners: Array<() => void> = [],
-  guest?: Worker,
+  messageReceiver?: MessageReceiver
 ) {
   return (...args: any) => {
     return new Promise((resolve, reject) => {
@@ -125,15 +154,27 @@ export function createRPC(
         connectionID: _connectionID,
       };
 
-      if (guest) guest.addEventListener(events.MESSAGE, handleResponse);
-      else self.addEventListener(events.MESSAGE, handleResponse);
-      listeners.push(() =>
-        self.removeEventListener(events.MESSAGE, handleResponse),
-      );
+      if (messageReceiver) {
+        messageReceiver.addEventListener(events.MESSAGE, handleResponse);
+        listeners.push(() =>
+          messageReceiver.removeEventListener(events.MESSAGE, handleResponse)
+        );
+      } else {
+        self.addEventListener(events.MESSAGE, handleResponse);
+        listeners.push(() =>
+          self.removeEventListener(events.MESSAGE, handleResponse)
+        );
+      }
 
-      if (guest) guest.postMessage(payload);
-      else if (isWorker()) (self as any).postMessage(payload);
-      else (event.source || event.target).postMessage(payload, event.origin);
+      if (messageReceiver && messageReceiver.postMessage) {
+        messageReceiver.postMessage(payload);
+      } else if (isWorker()) {
+        (self as any).postMessage(payload);
+      } else if (event.source.window === event.source) {
+        event.source.postMessage(payload, event.origin);
+      } else {
+        event.source.postMessage(payload);
+      }
     });
   };
 }
@@ -146,20 +187,26 @@ export function createRPC(
  * @param methods
  * @param _connectionID
  * @param event
- * @param guest
+ * @param messageReceiver
  */
 export function registerRemoteMethods(
   schema: ISchema = {},
   methods: any[] = [],
   _connectionID: string,
   event: any,
-  guest?: Worker,
+  messageReceiver?: MessageReceiver
 ) {
   const remote = { ...schema };
   const listeners: Array<() => void> = [];
 
   methods.forEach((methodName) => {
-    const rpc = createRPC(methodName, _connectionID, event, listeners, guest);
+    const rpc = createRPC(
+      methodName,
+      _connectionID,
+      event,
+      listeners,
+      messageReceiver
+    );
     set(remote, methodName, rpc);
   });
 

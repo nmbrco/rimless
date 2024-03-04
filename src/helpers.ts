@@ -15,10 +15,19 @@ export function isTrustedRemote(event: any) {
  *
  * @param event
  */
-export function isWorker() {
+export function isWorker(target?: unknown) {
+  if (target) {
+    // this check should be improved
+    return (
+      (target as Worker).onerror !== undefined &&
+      (target as Worker).onmessage !== undefined
+    );
+  }
+
   return (
     typeof WorkerGlobalScope !== 'undefined' &&
-    self instanceof WorkerGlobalScope
+    self instanceof WorkerGlobalScope &&
+    typeof (self as unknown as ServiceWorkerGlobalScope).clients === 'undefined'
   );
 }
 
