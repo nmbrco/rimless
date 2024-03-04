@@ -16,7 +16,10 @@ export function isTrustedRemote(event: any) {
  * @param event
  */
 export function isWorker() {
-  return typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+  return (
+    typeof WorkerGlobalScope !== 'undefined' &&
+    self instanceof WorkerGlobalScope
+  );
 }
 
 /**
@@ -27,22 +30,22 @@ export function isWorker() {
  */
 export function extractMethods(obj: any) {
   const paths: string[] = [];
-  (function parse(obj: any, path = "") {
+  (function parse(obj: any, path = '') {
     Object.keys(obj).forEach((prop) => {
       const propPath = path ? `${path}.${prop}` : prop;
       if (obj[prop] === Object(obj[prop])) {
         parse(obj[prop], propPath);
       }
-      if (typeof obj[prop] === "function") {
+      if (typeof obj[prop] === 'function') {
         paths.push(propPath);
       }
     });
-  }(obj));
+  })(obj);
   return paths;
 }
 
 const urlRegex = /^(https?:|file:)?\/\/([^/:]+)?(:(\d+))?/;
-const ports: any = { "http:": "80", "https:": "443" };
+const ports: any = { 'http:': '80', 'https:': '443' };
 
 /**
  * convert the url into an origin (remove paths)
@@ -50,10 +53,9 @@ const ports: any = { "http:": "80", "https:": "443" };
  * @param url
  */
 export function getOriginFromURL(url: string | null) {
-
   const { location } = document;
 
-  const regexResult = urlRegex.exec(url || "");
+  const regexResult = urlRegex.exec(url || '');
   let protocol;
   let hostname;
   let port;
@@ -73,12 +75,12 @@ export function getOriginFromURL(url: string | null) {
   // The origin of a document with file protocol is an opaque origin
   // and its serialization "null" [1]
   // [1] https://html.spec.whatwg.org/multipage/origin.html#origin
-  if (protocol === "file:") {
-    return "null";
+  if (protocol === 'file:') {
+    return 'null';
   }
 
   // If the port is the default for the protocol, we don't want to add it to the origin string
   // or it won't match the message's event.origin.
-  const portSuffix = port && port !== ports[protocol] ? `:${port}` : "";
+  const portSuffix = port && port !== ports[protocol] ? `:${port}` : '';
   return `${protocol}//${hostname}${portSuffix}`;
 }
