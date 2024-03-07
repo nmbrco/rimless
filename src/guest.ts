@@ -1,6 +1,6 @@
-import { extractMethods, isWorker } from './helpers';
-import { registerLocalMethods, registerRemoteMethods } from './rpc';
-import { actions, events, IConnection, ISchema } from './types';
+import { extractMethods, isWorker } from "./helpers";
+import { registerLocalMethods, registerRemoteMethods } from "./rpc";
+import { actions, events, IConnection, ISchema } from "./types";
 
 const REQUEST_INTERVAL = 600;
 const TIMEOUT_INTERVAL = 3000;
@@ -72,7 +72,7 @@ function connect(
 
       // publish the HANDSHAKE REQUEST
       if (target === (target as Window).window) {
-        target.postMessage(payload, '*');
+        target.postMessage(payload, "*");
       } else {
         target.postMessage(payload);
       }
@@ -81,8 +81,7 @@ function connect(
     // timeout the connection after a time
     setTimeout(() => {
       if (!connected) {
-        console.log('TIME TO REJECT', target);
-        reject('connection timeout');
+        reject("connection timeout");
       }
     }, TIMEOUT_INTERVAL);
   });
