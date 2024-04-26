@@ -1,25 +1,25 @@
-import get from 'lodash.get';
-import set from 'lodash.set';
-import { v4 as uuidv4 } from 'uuid';
+import get from "lodash.get";
+import set from "lodash.set";
+import { v4 as uuidv4 } from "uuid";
 
-import { isTrustedRemote, isWorker } from './helpers';
+import { isTrustedRemote, isWorker } from "./helpers";
 import {
   actions,
   events,
   IRPCRequestPayload,
   IRPCResolvePayload,
   ISchema,
-} from './types';
+} from "./types";
 
 type MessageReceiver =
   | Worker
   | {
       addEventListener: (
-        type: 'message',
+        type: "message",
         handler: (event: MessageEvent) => void | Promise<void>
       ) => void;
       removeEventListener: (
-        type: 'message',
+        type: "message",
         handler: (event: MessageEvent) => void | Promise<void>
       ) => void;
       postMessage?: never;
@@ -132,13 +132,20 @@ export function createRPC(
 
       // on RPC response
       function handleResponse(event: any) {
-        const { callID, connectionID, callName, result, error, action } =
-          event.data as IRPCResolvePayload;
+        const {
+          callID: responseCallID,
+          connectionID,
+          callName,
+          result,
+          error,
+          action,
+        } = event.data as IRPCResolvePayload;
 
         if (!isTrustedRemote(event)) return;
-        if (!callID || !callName) return;
+        if (!responseCallID || !callName) return;
         if (callName !== _callName) return;
         if (connectionID !== _connectionID) return;
+        if (responseCallID !== callID) return;
 
         // resolve the response
         if (action === actions.RPC_RESOLVE) return resolve(result);
