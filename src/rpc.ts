@@ -177,10 +177,12 @@ export function createRPC(
         messageReceiver.postMessage(payload);
       } else if (isWorker()) {
         (self as any).postMessage(payload);
-      } else if (event.source.window === event.source) {
+      } else if (event.source && event.source.window === event.source) {
         event.source.postMessage(payload, event.origin);
-      } else {
+      } else if (event.source) {
         event.source.postMessage(payload);
+      } else {
+        // no-op; event source has disappeared and cannot receive the response
       }
     });
   };
